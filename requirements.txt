@@ -1,0 +1,7 @@
+datetime
+sys
+time
+ccxt
+numpy
+pandas
+sqlite3
