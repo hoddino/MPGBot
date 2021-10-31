@@ -1,11 +1,13 @@
 import ccxt
 import pandas as pd
 
+# from classes.Database import Database
+
 import config
 
 
 class Exchange:
-    def __init__(self,):
+    def __init__(self):
         self.historical_data = []
         self.exchange_data = []
         self.open_orders = []
@@ -34,23 +36,21 @@ class Exchange:
     def read_balance(self):
         return self.exchange.fetch_balance()
 
-    def read_filled_orders(self):
-        pass
-
     def get_exchange_rate(self):
         for market in self.exchange.fetch_markets():
             if market['symbol'] == self.symbol:
                 return float(market['info']['price'])
 
     def create_order(self, side, quantity, price):
-        # quantity in base currency
-        # price in quote currency
         order = self.exchange.create_order(
             self.symbol, config.ORDER_TYPE, side, quantity, price)
-        print(str(order))
-        self.open_orders.append(order['id'])
         return order
 
-    def cancel_open_orders(self):
-        for id in self.open_orders:
-            self.exchange.cancel_order(id)
+    def cancel_orders(self, id_list):
+        try:
+            for id in id_list:
+                self.exchange.cancel_order(id)
+            return True
+        except Exception as exc:
+            print(exc)
+            return False

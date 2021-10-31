@@ -18,7 +18,7 @@ class Database:
         )")
         self.connection.commit()
         cursor.close()
-    
+
     def __str__(self):
         return "{name:" + self.name + "}"
 
@@ -36,10 +36,18 @@ class Database:
     def read_orders(self):
         cursor = self.connection.cursor()
         cursor.execute("SELECT * FROM orders")
-        print(cursor.fetchall())
+        orders = cursor.fetchall()
         cursor.close()
 
-    def clear_orders(self):
+        return orders
+
+    def clear_orders(self, ids=[]):
         cursor = self.connection.cursor()
-        cursor.execute("DELETE FROM orders")
+        if len(ids) <= 0:
+            cursor.execute("DELETE FROM orders")
+        else:
+            for id in ids:
+                cursor.execute("DELETE FROM orders WHERE id='%s'" % id)
+
+        self.connection.commit()
         cursor.close()

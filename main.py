@@ -9,8 +9,8 @@ from classes.Database import Database
 
 if __name__ == '__main__':
     exchange = Exchange()
-    account = Account(exchange)
     database = Database()
+    account = Account(exchange, database)
 
     # using:
     # - fetchOrders
@@ -20,11 +20,7 @@ if __name__ == '__main__':
     base_coin = symbol.split('/')[0]
     quote_coin = symbol.split('/')[1]
 
-    # read timeframe
-    timeframe = config.TIMEFRAME
-
     # load current exchange rate
-    ticker_data = exchange.exchange.fetch_ticker(symbol)
     exchange_rate = exchange.get_exchange_rate()
 
     # read balance from exchange
@@ -47,18 +43,17 @@ if __name__ == '__main__':
         # read balance from exchange
         quote_balance = account.read_balance(quote_coin)
 
-    # order = exchange.create_order("buy", 0.0038, 52400)
+    order = account.create_order("buy", 0.0001, 50000)
     # database.save_order(order)
-    # database.read_orders()
-    # time.sleep(10)
-    # exchange.cancel_open_orders()
-    # database.clear_orders()
+    database.read_orders()
+    time.sleep(10)
+    account.cancel_open_orders()
+    print(database.read_orders())
 
     log.info("Setup complete!")
     log.info("")
     log.info("Exchange:      " + exchange.exchange.id)
     log.info("Market:        " + symbol)
-    log.info("Timeframe:     " + timeframe)
     log.info("Base balance:  " + str(base_balance) + " " + base_coin)
     log.info("Quote balance: " + str(quote_balance) + " " + quote_coin)
     log.info("Use equity:    " + str(config.USE_EQUITY))
@@ -70,17 +65,17 @@ if __name__ == '__main__':
     log.info("Starting value: " + str(starting_value) + " " + quote_coin)
     log.info("")
 
-    while True:
-        text = input("Would you like to start the simulation now? (y/n) ")
-        if text in ["y", "yes"]:
-            # successful, sim may start
-            break
-        elif text in ["n", "no"]:
-            # abort, shut down
-            log.info("Simulation aborted! kthxbye")
-            sys.exit(0)
-        else:
-            log.warn("Invalid input, please try again...")
+    # while True:
+    #     text = input("Would you like to start the simulation now? (y/n) ")
+    #     if text in ["y", "yes"]:
+    #         # successful, sim may start
+    #         break
+    #     elif text in ["n", "no"]:
+    #         # abort, shut down
+    #         log.info("Simulation aborted! kthxbye")
+    #         sys.exit(0)
+    #     else:
+    #         log.warn("Invalid input, please try again...")
 
     # start the simulation
     # grid_strategy = GridStrategy()
