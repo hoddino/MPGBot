@@ -4,6 +4,7 @@ import pandas as pd
 # from classes.Database import Database
 
 import config
+import log
 
 
 class Exchange:
@@ -12,6 +13,9 @@ class Exchange:
         self.exchange_data = []
         self.open_orders = []
         self.symbol = config.SYMBOL
+        coins = self.symbol.split("/")
+        self.base_coin = coins[0]
+        self.quote_coin = coins[1]
 
         exchange_class = getattr(ccxt, config.EXCHANGE)
         self.exchange = exchange_class({
@@ -54,3 +58,20 @@ class Exchange:
         except Exception as exc:
             print(exc)
             return False
+
+    def cancel_order(self, id):
+        try:
+            self.exchange.cancel_order(id)
+            return True
+        except ccxt.InvalidOrder as exc:
+            log.warn(
+                f"Failed to cancel order with id {id}! Reason: {str(exc)}")
+            return False
+
+    def get_order_history(self):
+        orders = self.exchange.fetch_orders(self.symbol, limit=300)
+        # print(orders)
+
+        # with open('out.txt', 'w') as f:
+        #     print(orders, file=f)
+        return orders

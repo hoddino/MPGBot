@@ -13,7 +13,7 @@ if __name__ == '__main__':
     account = Account(exchange, database)
 
     # using:
-    # - fetchOrders
+    #
 
     # read symbol
     symbol = config.SYMBOL
@@ -43,12 +43,15 @@ if __name__ == '__main__':
         # read balance from exchange
         quote_balance = account.read_balance(quote_coin)
 
-    order = account.create_order("buy", 0.0001, 50000)
+    # buy = account.create_order("buy", .0001, 52800)['id']
+    # print(buy)
+    # order = account.get_last_filled_order()
+    # print(order)
     # database.save_order(order)
-    database.read_orders()
-    time.sleep(10)
-    account.cancel_open_orders()
-    print(database.read_orders())
+    # database.read_orders()
+    # time.sleep(5)
+    # account.cancel_open_orders()
+    # print(database.read_orders())
 
     log.info("Setup complete!")
     log.info("")
@@ -83,3 +86,5 @@ if __name__ == '__main__':
     #                                 base_balance, quote_balance)
     # percent = (end_value / starting_value - 1) * 100
     # log.info("Change: %.3f%%" % percent)
+
+    account.get_filled_orders()

@@ -1,19 +1,19 @@
 import pandas as pd
 import time
-from classes.LimitOrder import LimitOrder
 
 import config
 
 
 class GridStrategy:
     def __init__(self, account):
-        self.buy_order = None
-        self.sell_order = None
-        self.base_balance = 0
-        self.quote_balance = 0
-        self.buy_prices = []
-        self.simulate = True
         self.account = account
+        self.buy_id = 0
+        self.sell_id = 0
+        self.buy_prices = []
+        self.trading = True
+        coins = config.SYMBOL.split("/")
+        self.quote_balance = self.account.get_balance(coins[0])
+        self.base_balance = self.account.get_balance(coins[1])
 
     # def start(self, data, symbol, starting_base_balance, starting_quote_balance):
     #     self.starting_base_balance = starting_base_balance
@@ -87,38 +87,49 @@ class GridStrategy:
     #     return end_value
 
     def start(self):
-        while self.simulate:
+        # cancel open orders saved in DB
+        self.account.cancel_open_orders()
+
+        # get filled order history
+        filled_orders = self.account.get_filled_orders()
+
+        if filled_orders[-1]['side'] == 'sell':
+            # buy small base
+            pass
+        elif filled_orders[-1]['side'] == 'buy':
+            # calc avg price of x recently filled buy orders
+            pass
+
+        while self.trading:
             open_orders = self.account.get_open_orders()
+            break
 
     def cancel_orders(self):
-        if not self.buy_order == None:
-            self.buy_order.cancel_order()
-        if not self.sell_order == None:
-            self.sell_order.cancel_order()
+        self.account.cancel_open_orders()
 
-        self.buy_order = None
-        self.sell_order = None
+    def place_orders(self):
+        self.place_buy_order()
+        self.place_sell_order()
 
-    def place_orders(self, symbol):
-        self.place_buy_order(symbol)
-        self.place_sell_order(symbol)
+    def place_buy_order(self):
+        last_price = float(self.account.get_last_filled_order()[3])
+        self.buy_price = round(last_price *
+                               (1 - config.STEP_DISTANCE), config.DECIMAL_PRECISION)  # in quote currency
+        self.buy_quantity = round(self.quote_balance * config.USE_EQUITY /
+                                  self.account.exchange.get_exchange_rate(), config.DECIMAL_PRECISION)  # in base currency
 
-    def place_buy_order(self, symbol):
-        self.buy_price = round(self.buy_price *
-                               (1 - config.STEP_DISTANCE), config.DECIMAL_PRECISION)
-        self.buy_quantity = round(self.starting_quote_balance *
-                                  config.USE_EQUITY, config.DECIMAL_PRECISION)  # in quote currency
+        # self.buy_order = LimitOrder(
+        #     symbol, self.buy_quantity, self.buy_price, "buy")
+        self.buy_id = self.account.create_order(
+            "buy", self.buy_quantity, self.buy_price)['id']
 
-        # if is affordable
-        if self.quote_balance > self.buy_quantity:
-            self.buy_order = LimitOrder(
-                symbol, self.buy_quantity, self.buy_price, "buy")
-
-    def place_sell_order(self, symbol):
+    def place_sell_order(self):
         self.sell_price = round((sum(self.buy_prices) / len(self.buy_prices)
-                                 ) / (1 - config.TAKE_PROFIT), config.DECIMAL_PRECISION)
-        self.sell_quantity = round(self.sell_price *
-                                   self.base_balance, config.DECIMAL_PRECISION)  # calc into quote currency
+                                 ) / (1 - config.TAKE_PROFIT), config.DECIMAL_PRECISION)  # in quote currency
+        self.sell_quantity = round(self.account.read_balance(
+            self.account.base_coin), config.DECIMAL_PRECISION)  # in base currency
 
-        self.sell_order = LimitOrder(
-            symbol, self.sell_quantity, self.sell_price, "sell")
+        # self.sell_order = LimitOrder(
+        #     symbol, self.sell_quantity, self.sell_price, "sell")
+        self.sell_id = self.account.create_order(
+            "sell", self.sell_quantity, self.sell_price)['id']
