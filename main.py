@@ -102,5 +102,5 @@ if __name__ == '__main__':
     # log.info("Change: %.3f%%" % percent)
 
     # start trading
-    strategy = GridStrategy()
+    strategy = GridStrategy(account)
     strategy.start()

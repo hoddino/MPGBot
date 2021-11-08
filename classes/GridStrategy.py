@@ -2,6 +2,7 @@
 import time
 
 import config
+import log
 
 
 class GridStrategy:
@@ -12,15 +13,16 @@ class GridStrategy:
         self.buy_prices = []
         self.trading = True
         coins = config.SYMBOL.split("/")
-        self.quote_coin = coins[0]
-        self.base_coin = coins[1]
-        self.quote_balance = self.account.get_balance(self.quote_coin)
-        # self.base_balance = self.account.get_balance(self.base_coin)
+        self.base_coin = coins[0]
+        self.quote_coin = coins[1]
+        self.quote_balance = self.account.read_balance(self.quote_coin)
+        # self.base_balance = self.account.read_balance(self.base_coin)
         self.buy_price = 0
         self.buy_quantity = 0
         self.sell_price = 0
         self.sell_quantity = 0
         self.quick_order_set = False
+        self.update_quote_balance()
 
     # def start(self, data, symbol, starting_base_balance, starting_quote_balance):
     #     self.starting_base_balance = starting_base_balance
@@ -100,7 +102,9 @@ class GridStrategy:
         # get filled order history
         filled_orders = self.account.get_filled_orders()
 
-        if filled_orders[-1]['side'] == 'sell':
+        if len(filled_orders) == 0:
+            self.place_quick_buy_order()
+        elif filled_orders[-1]['side'] == 'sell':
             # reset buy prices list
             self.buy_prices = []
 
@@ -130,8 +134,10 @@ class GridStrategy:
             while not self.quick_order_set == None and self.quick_order_set['status'] == 'open':
                 self.account.cancel_order(self.quick_order_set['id'])
                 self.place_quick_buy_order()
+                log.info("New quick buy order has been placed")
 
                 time.sleep(config.QUICK_BUY_RATE)
+                self.account.update_all_orders_status()
 
             buy_order = self.account.get_order_by_id(self.buy_id)
             sell_order = self.account.get_order_by_id(self.sell_id)
