@@ -52,7 +52,8 @@ class Account:
 
     def get_filled_orders(self):
         # from exchange
-        orders = self.exchange.get_order_history()
+        # orders = self.exchange.get_order_history()
+        orders = self.db.read_orders()
 
         # only take closed/filled orders
         filled_orders = []
@@ -86,8 +87,6 @@ class Account:
         # print(order_ids)
 
         if len(order_ids) > 0:
-            # if self.exchange.cancel_orders(order_ids):
-            #     self.db.clear_orders(order_ids)
             for id in order_ids:
                 self.exchange.cancel_order(id)
                 self.db.clear_order(id)
@@ -95,3 +94,8 @@ class Account:
     def cancel_order(self, id):
         self.exchange.cancel_order(id)
         self.db.clear_order(id)
+
+    def update_all_orders_status(self):
+        orders = self.exchange.get_order_history()
+        for order in orders:
+            self.db.update_order_status(order)

@@ -121,6 +121,7 @@ class GridStrategy:
         # start trading
         while self.trading:
             self.update_quote_balance()
+            self.account.update_all_orders_status()
 
             # wait for quick buy order
             while not self.quick_order_set == None and self.quick_order_set['status'] == 'open':
