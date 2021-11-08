@@ -1,5 +1,6 @@
 # Exchange settings
 EXCHANGE = 'ftx'  # ccxt exchange name
+SUBACCOUNT = ''  # name of Subaccount, i.e. 'Martin'
 API_KEY = ''
 API_SECRET = ''
 REFRESH_RATE = 0.5  # in seconds

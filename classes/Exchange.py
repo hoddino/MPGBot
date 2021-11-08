@@ -1,5 +1,5 @@
 import ccxt
-import pandas as pd
+# import pandas as pd
 
 # from classes.Database import Database
 
@@ -23,11 +23,16 @@ class Exchange:
             'secret': config.API_SECRET,
             'enableRateLimit': True
         })
+        if config.EXCHANGE == 'ftx' and not config.SUBACCOUNT == '':
+            self.exchange.headers = {
+                'FTX-SUBACCOUNT': config.SUBACCOUNT
+            }
+
         self.exchange.load_markets()
 
-    def load_data(self, timeframe='5m'):
-        self.original_data = self.exchange.fetchOHLCV(self.symbol, timeframe)
-        self.historical_data = pd.DataFrame.from_dict(self.original_data)
+    # def load_data(self, timeframe='5m'):
+    #     self.original_data = self.exchange.fetchOHLCV(self.symbol, timeframe)
+    #     self.historical_data = pd.DataFrame.from_dict(self.original_data)
 
     def market_exists(self, symbol=None):
         if symbol == None:
