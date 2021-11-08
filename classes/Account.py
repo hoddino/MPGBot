@@ -19,6 +19,14 @@ class Account:
         except KeyError:
             return None
 
+    def get_last_open_order(self):
+        orders = self.db.read_orders()
+
+        # get most recent open order
+        for order in orders:
+            if order[5] == 'open':
+                return order
+
     def get_open_orders(self):
         orders = self.db.read_orders()
         open_orders = []
@@ -80,3 +88,7 @@ class Account:
             for id in order_ids:
                 self.exchange.cancel_order(id)
                 self.db.clear_order(id)
+
+    def cancel_order(self, id):
+        self.exchange.cancel_order(id)
+        self.db.clear_order(id)
