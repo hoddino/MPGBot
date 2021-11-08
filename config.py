@@ -2,7 +2,8 @@
 EXCHANGE = 'ftx'  # ccxt exchange name
 API_KEY = ''
 API_SECRET = ''
-REFRESH_RATE = 60  # in seconds
+REFRESH_RATE = 0.5  # in seconds
+QUICK_BUY_RATE = 60  # in seconds
 ORDER_TYPE = 'limit'  # limit or market order
 
 SYMBOL = 'BTC/EUR'  # market to trade in
