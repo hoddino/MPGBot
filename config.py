@@ -6,7 +6,7 @@ REFRESH_RATE = 0.5  # in seconds
 QUICK_BUY_RATE = 60  # in seconds
 ORDER_TYPE = 'limit'  # limit or market order
 
-SYMBOL = 'BTC/EUR'  # market to trade in
+SYMBOL = 'ETH/BTC'  # market to trade in
 
 # Strategy settings
 USE_EQUITY = 0.1  # percentage to use

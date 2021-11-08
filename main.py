@@ -8,6 +8,16 @@ from classes.GridStrategy import *
 from classes.Database import Database
 
 if __name__ == '__main__':
+    # check config parameters
+    if config.EXCHANGE == '':
+        log.error("Please enter an exchange market in config.py!")
+    elif config.API_KEY == '':
+        log.error("Please enter an API key in config.py!")
+    elif config.API_SECRET == '':
+        log.error("Please enter an API secret in config.py!")
+    elif not config.ORDER_TYPE in ['limit', 'market']:
+        log.error("Please enter a valid order type!")
+
     exchange = Exchange()
     database = Database()
     account = Account(exchange, database)
@@ -87,4 +97,6 @@ if __name__ == '__main__':
     # percent = (end_value / starting_value - 1) * 100
     # log.info("Change: %.3f%%" % percent)
 
-    account.get_filled_orders()
+    # start trading
+    strategy = GridStrategy()
+    strategy.start()
