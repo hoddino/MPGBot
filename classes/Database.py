@@ -36,7 +36,8 @@ class Database:
 
     def read_orders(self):
         # cursor = self.connection.cursor()
-        self.cursor.execute("SELECT * FROM orders LIMIT 300")
+        self.cursor.execute(
+            "SELECT * FROM orders ORDER BY timestamp DESC LIMIT 300")
         orders = self.cursor.fetchall()
         # cursor.close()
 
