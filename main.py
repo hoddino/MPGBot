@@ -10,13 +10,17 @@ from classes.Database import Database
 if __name__ == '__main__':
     # check config parameters
     if config.EXCHANGE == '':
-        log.error("Please enter an exchange market in config.py!")
+        log.error("Please specify an exchange market in config.py!")
+        sys.exit(0)
     elif config.API_KEY == '':
-        log.error("Please enter an API key in config.py!")
+        log.error("Please specify an API key in config.py!")
+        sys.exit(0)
     elif config.API_SECRET == '':
-        log.error("Please enter an API secret in config.py!")
+        log.error("Please specify an API secret in config.py!")
+        sys.exit(0)
     elif not config.ORDER_TYPE in ['limit', 'market']:
-        log.error("Please enter a valid order type!")
+        log.error("Please specify a valid order type in config.py!")
+        sys.exit(0)
 
     exchange = Exchange()
     database = Database()
