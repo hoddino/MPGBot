@@ -44,7 +44,7 @@ class Account:
     def get_last_filled_order(self):
         orders = self.db.read_orders()
 
-        for order in reversed(orders):
+        for order in list(reversed(orders)):
             if order[5] == 'filled':
                 return order
 
