@@ -27,3 +27,8 @@
 *.sql
 *.sqlite
 *.db
+
+# Specifics #
+#############
+out.txt
+LimitOrder.py
