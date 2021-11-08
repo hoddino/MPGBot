@@ -19,6 +19,9 @@ class Account:
         except KeyError:
             return None
 
+    def get_order_by_id(self, id):
+        return self.db.read_order_by_id(id)
+
     def get_last_open_order(self):
         orders = self.db.read_orders()
 

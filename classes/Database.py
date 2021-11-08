@@ -43,6 +43,10 @@ class Database:
 
         return orders
 
+    def read_order_by_id(self, id):
+        self.cursor.execute("SELECT * FROM orders WHERE id='%s'" % id)
+        return self.cursor.fetchone()
+
     def clear_orders(self, ids=[]):
         # cursor = self.connection.cursor()
         if len(ids) <= 0:
