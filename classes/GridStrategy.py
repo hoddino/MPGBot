@@ -101,6 +101,9 @@ class GridStrategy:
         filled_orders = self.account.get_filled_orders()
 
         if filled_orders[-1]['side'] == 'sell':
+            # reset buy prices list
+            self.buy_prices = []
+
             # buy small base
             self.place_quick_buy_order()
         elif filled_orders[-1]['side'] == 'buy':

@@ -36,8 +36,11 @@ class Database:
         # cursor.close()
 
     def update_order_status(self, order):
-        ret = self.cursor.execute("UPDATE Orders SET status='%s' WHERE id=%s" % (
-            order['status'], order['id']))
+        status = order['status']
+        if status == 'closed':
+            status = 'filled'
+        self.cursor.execute("UPDATE Orders SET status='%s' WHERE id=%s" % (
+            status, order['id']))
         self.connection.commit()
 
         # info message
