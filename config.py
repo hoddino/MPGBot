@@ -1,11 +1,11 @@
 # Exchange settings
-EXCHANGE = 'ftx'
+EXCHANGE = 'ftx'  # ccxt exchange name
 API_KEY = ''
 API_SECRET = ''
 REFRESH_RATE = 60  # in seconds
 ORDER_TYPE = 'limit'  # limit or market order
 
-SYMBOL = 'BTC/EUR'  # market to simulate
+SYMBOL = 'BTC/EUR'  # market to trade in
 
 # Strategy settings
 USE_EQUITY = 0.1  # percentage to use

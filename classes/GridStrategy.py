@@ -98,20 +98,26 @@ class GridStrategy:
             pass
         elif filled_orders[-1]['side'] == 'buy':
             # calc avg price of x recently filled buy orders
-            pass
+            buys = []
+
+            for order in reversed(filled_orders):
+                if order['side'] == "buy":
+                    buys.append(float(order['price']))
 
         while self.trading:
             open_orders = self.account.get_open_orders()
             break
 
+            time.sleep(config.REFRESH_RATE)
+
     def cancel_orders(self):
         self.account.cancel_open_orders()
 
-    def place_orders(self):
-        self.place_buy_order()
-        self.place_sell_order()
+    def place_grid_orders(self):
+        self.place_grid_buy_order()
+        self.place_grid_sell_order()
 
-    def place_buy_order(self):
+    def place_grid_buy_order(self):
         last_price = float(self.account.get_last_filled_order()[3])
         self.buy_price = round(last_price *
                                (1 - config.STEP_DISTANCE), config.DECIMAL_PRECISION)  # in quote currency
@@ -123,7 +129,7 @@ class GridStrategy:
         self.buy_id = self.account.create_order(
             "buy", self.buy_quantity, self.buy_price)['id']
 
-    def place_sell_order(self):
+    def place_grid_sell_order(self):
         self.sell_price = round((sum(self.buy_prices) / len(self.buy_prices)
                                  ) / (1 - config.TAKE_PROFIT), config.DECIMAL_PRECISION)  # in quote currency
         self.sell_quantity = round(self.account.read_balance(
