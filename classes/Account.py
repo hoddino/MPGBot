@@ -20,7 +20,16 @@ class Account:
             return None
 
     def get_order_by_id(self, id):
-        return self.db.read_order_by_id(id)
+        order = self.db.read_order_by_id(id)
+        return {
+            "id": int(order[0]),
+            "type": order[1],
+            "side": order[2],
+            "price": float(order[3]),
+            "quantity": float(order[4]),
+            "status": order[5],
+            "timestamp": order[6]
+        }
 
     def get_last_open_order(self):
         orders = self.db.read_orders()
@@ -88,12 +97,14 @@ class Account:
 
         if len(order_ids) > 0:
             for id in order_ids:
-                self.exchange.cancel_order(id)
-                self.db.clear_order(id)
+                # self.exchange.cancel_order(id)
+                # self.db.clear_order(id)
+                self.cancel_order(id)
 
     def cancel_order(self, id):
         self.exchange.cancel_order(id)
         self.db.clear_order(id)
+        log.info(f"Order id {id} canceled")
 
     def update_all_orders_status(self):
         orders = self.exchange.get_order_history()
