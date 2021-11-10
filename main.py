@@ -44,7 +44,7 @@ if __name__ == '__main__':
     quote_balance = account.read_balance(quote_coin)
 
     # abort if no money
-    while quote_balance <= 0:
+    while quote_balance == None and quote_balance <= 0:
         log.error("No capital available! Please top up your account.")
         # print(config.PREFIX_ERROR,
         #       "No capital available! Please top up your account.")
