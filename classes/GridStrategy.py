@@ -21,7 +21,7 @@ class GridStrategy:
         self.buy_quantity = 0
         self.sell_price = 0
         self.sell_quantity = 0
-        self.quick_order_set = False
+        self.quick_order_set = None
         self.update_quote_balance()
 
     # def start(self, data, symbol, starting_base_balance, starting_quote_balance):
@@ -128,7 +128,7 @@ class GridStrategy:
         # start trading
         while self.trading:
             self.update_quote_balance()
-            self.account.update_all_orders_status()
+            self.update_quick_buy_order()
 
             # wait for quick buy order
             while not self.quick_order_set == None and self.quick_order_set['status'] == 'open':
@@ -137,17 +137,17 @@ class GridStrategy:
                 log.info("New quick buy order has been placed")
 
                 time.sleep(config.QUICK_BUY_RATE)
-                self.account.update_all_orders_status()
+                self.update_quick_buy_order()
 
             buy_order = self.account.get_order_by_id(self.buy_id)
             sell_order = self.account.get_order_by_id(self.sell_id)
 
             # check if order filled
-            if buy_order['status'] == 'closed':
+            if buy_order['status'] == 'filled':
                 self.cancel_orders()
                 # make quick buy to have a new base balance
                 self.place_quick_buy_order()
-            elif sell_order['status'] == 'closed':
+            elif sell_order['status'] == 'filled':
                 self.cancel_orders()
                 # place new grid orders
                 self.place_grid_orders()
@@ -156,6 +156,12 @@ class GridStrategy:
 
     def update_quote_balance(self):
         self.quote_balance = self.account.read_balance(self.quote_coin)
+
+    def update_quick_buy_order(self):
+        self.account.update_all_orders_status()
+        if not self.quick_order_set == None:
+            self.quick_order_set['status'] = self.account.get_order_by_id(
+                self.quick_order_set['id'])['status']
 
     def cancel_orders(self):
         self.account.cancel_open_orders()
