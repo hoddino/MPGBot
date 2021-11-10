@@ -52,37 +52,41 @@ class GridStrategy:
 
         # start trading
         while self.trading:
-            self.update_quote_balance()
-            self.update_quick_buy_order()
-
-            # wait for quick buy order
-            while not self.quick_order_set == None and self.quick_order_set['status'] == 'open':
-                self.account.cancel_order(self.quick_order_set['id'])
-                self.place_quick_buy_order()
-                log.info("New quick buy order has been placed")
-
-                time.sleep(config.QUICK_BUY_RATE)
+            try:
+                self.update_quote_balance()
                 self.update_quick_buy_order()
 
-            buy_order = self.account.get_order_by_id(self.buy_id)
-            sell_order = self.account.get_order_by_id(self.sell_id)
+                # wait for quick buy order
+                while not self.quick_order_set == None and self.quick_order_set['status'] == 'open':
+                    self.account.cancel_order(self.quick_order_set['id'])
+                    self.place_quick_buy_order()
+                    log.info("New quick buy order has been placed")
 
-            # check if order filled
-            if buy_order['status'] == 'filled':
-                self.cancel_orders()
-                # enlarge buy price list
-                self.buy_prices.append(buy_order['price'])
-                # place new grid orders
-                self.place_grid_orders()
+                    time.sleep(config.QUICK_BUY_RATE)
+                    self.update_quick_buy_order()
 
-            elif sell_order['status'] == 'closed':
-                self.cancel_orders()
-                # recalculate buy_quantity (amount) in quote currency
-                self.buy_quantity = self.quote_balance * config.USE_EQUITY
-                # reset buy price list
-                self.buy_prices = []
-                # make quick buy to have a new base balance
-                self.place_quick_buy_order()
+                buy_order = self.account.get_order_by_id(self.buy_id)
+                sell_order = self.account.get_order_by_id(self.sell_id)
+
+                # check if order filled
+                if buy_order['status'] == 'filled':
+                    self.cancel_orders()
+                    # enlarge buy price list
+                    self.buy_prices.append(buy_order['price'])
+                    # place new grid orders
+                    self.place_grid_orders()
+
+                elif sell_order['status'] == 'closed':
+                    self.cancel_orders()
+                    # recalculate buy_quantity (amount) in quote currency
+                    self.buy_quantity = self.quote_balance * config.USE_EQUITY
+                    # reset buy price list
+                    self.buy_prices = []
+                    # make quick buy to have a new base balance
+                    self.place_quick_buy_order()
+
+            except Exception as exc:
+                log.warn(f"Following exception occured but we ignored it succesfully: {str(exc)}")
 
             time.sleep(config.REFRESH_RATE)
 

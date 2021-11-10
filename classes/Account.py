@@ -14,7 +14,6 @@ class Account:
 
     def read_balance(self, coin):
         self.update_balance()
-        print(self.balance)
         try:
             return self.balance[coin]['free']
         except KeyError:
