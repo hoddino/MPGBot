@@ -14,22 +14,26 @@ class Account:
 
     def read_balance(self, coin):
         self.update_balance()
+        print(self.balance)
         try:
             return self.balance[coin]['free']
         except KeyError:
-            return None
+            return 0
 
     def get_order_by_id(self, id):
         order = self.db.read_order_by_id(id)
-        return {
-            "id": int(order[0]),
-            "type": order[1],
-            "side": order[2],
-            "price": float(order[3]),
-            "quantity": float(order[4]),
-            "status": order[5],
-            "timestamp": order[6]
-        }
+        if order == None:
+            return None
+        else:
+            return {
+                "id": int(order[0]),
+                "type": order[1],
+                "side": order[2],
+                "price": float(order[3]),
+                "quantity": float(order[4]),
+                "status": order[5],
+                "timestamp": order[6]
+            }
 
     def get_last_open_order(self):
         orders = self.db.read_orders()
@@ -61,8 +65,8 @@ class Account:
 
     def get_filled_orders(self):
         # from exchange
-        # orders = self.exchange.get_order_history()
-        orders = self.db.read_orders()
+        orders = self.exchange.get_order_history()
+        # orders = self.db.read_orders()
 
         # only take closed/filled orders
         filled_orders = []
@@ -83,7 +87,7 @@ class Account:
 
         # print log msg
         log.info(
-            f"{side} order has been placed! {quantity} {self.base_coin} @ {price} {self.quote_coin}")
+            f"{str(side).capitalize()} order id {order['id']} has been placed! {quantity} {self.base_coin} @ {price} {self.quote_coin}")
 
         return order
 
