@@ -36,20 +36,21 @@ class Database:
         # cursor.close()
 
     def update_order_status(self, order):
+        # switch status names
         status = order['status']
         if status == 'closed':
             status = 'filled'
-        self.cursor.execute("UPDATE Orders SET status='%s' WHERE id=%s" % (
-            status, order['id']))
-        self.connection.commit()
 
-        # info message
-        if self.cursor.rowcount < 1:
-            # error
-            pass
-        else:
+        # only update when value has changed
+        order_db = self.read_order_by_id(order['id'])
+        if not order_db == None and not status == order_db[5]:
+            self.cursor.execute(
+                "UPDATE Orders SET status='%s' WHERE id=%s" % (status, order['id']))
+            self.connection.commit()
+
+            # info message
             log.info("Order id " + order['id'] +
-                     " changed status to: " + order['status'])
+                     " changed status to: " + status)
 
     def read_orders(self):
         # cursor = self.connection.cursor()
