@@ -76,6 +76,17 @@ class Account:
         return filled_orders
 
     def create_order(self, side, quantity, price):
+        # check order quantity
+        compare_market = self.base_coin + "/USD"
+        if self.exchange.market_exists(compare_market):
+            # order quantity must be >10 USD
+            quantity_usd = self.exchange.get_exchange_rate() * quantity
+            if quantity_usd < 10:
+                log.error(
+                    "Order size is below 10 USD. Please top up your account or change USE_EQUITY in config.")
+        else:
+            log.warn("Order size could not be validated over 10 USD!")
+
         # quantity in base currency
         # price in quote currency
         order = self.exchange.create_order(side, quantity, price)
@@ -84,7 +95,8 @@ class Account:
         self.db.save_order(order)
 
         # print log msg
-        log.info(f"{str(side).capitalize()} order id {order['id']} has been placed! {quantity} {self.base_coin} @ {price} {self.quote_coin}")
+        log.info(
+            f"{str(side).capitalize()} order id {order['id']} has been placed! {quantity} {self.base_coin} @ {price} {self.quote_coin}")
 
         return order
 
