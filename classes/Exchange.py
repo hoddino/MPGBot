@@ -45,8 +45,11 @@ class Exchange:
     def read_balance(self):
         return self.exchange.fetch_balance()
 
+    def read_markets(self):
+        return self.exchange.fetch_markets()
+
     def get_exchange_rate(self):
-        for market in self.exchange.fetch_markets():
+        for market in self.read_markets():
             if market['symbol'] == self.symbol:
                 return float(market['info']['price'])
 
