@@ -15,7 +15,7 @@ def warn(message):
 
 def error(message):
     print(datetime.now().strftime(DATE_FORMAT), config.PREFIX_ERROR, message)
-    sys.exit()  # exit program after error
+    sys.exit(0)  # exit program after error
 
 
 def buy(message):
