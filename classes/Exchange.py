@@ -48,9 +48,11 @@ class Exchange:
     def read_markets(self):
         return self.exchange.fetch_markets()
 
-    def get_exchange_rate(self):
+    def get_exchange_rate(self, symbol=''):
+        if symbol == '':
+            symbol = self.symbol
         for market in self.read_markets():
-            if market['symbol'] == self.symbol:
+            if market['symbol'] == symbol:
                 return float(market['info']['price'])
 
     def create_order(self, side, quantity, price):

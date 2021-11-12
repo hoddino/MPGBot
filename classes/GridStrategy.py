@@ -108,11 +108,8 @@ class GridStrategy:
         # get current price -0.001% (basically buy immediately)
         self.buy_price = float(self.account.exchange.get_exchange_rate() * (1 - 0.00001))
         buy_amount = self.buy_quantity / self.account.exchange.get_exchange_rate()  # in base currency
-        # creat order and look for exception
-        try:
-            self.quick_order_set = self.account.create_order("buy", buy_amount, self.buy_price)
-        except Exception as exc:
-            log.error(f"Please top up your account or use more equity! Reason: {str(exc)}") # most likely size too small due to low equity
+        # creat order
+        self.quick_order_set = self.account.create_order("buy", buy_amount, self.buy_price)
         # save order id
         self.buy_id = self.quick_order_set['id']
 
@@ -126,11 +123,8 @@ class GridStrategy:
         self.buy_price = last_price * (1 - config.STEP_DISTANCE)  # in quote currency
         # calculate amount to base currency
         buy_amount = self.buy_quantity / self.account.exchange.get_exchange_rate()  # in base currency
-        # create order and look for exception
-        try:
-            self.buy_id = self.account.create_order("buy", buy_amount, self.buy_price)['id']
-        except Exception as exc:
-            log.error(f"Please top up your account or use more equity! Reason: {str(exc)}") # most likely size too small due to low equity
+        # create order
+        self.buy_id = self.account.create_order("buy", buy_amount, self.buy_price)['id']
         # confirm quick buy order is not active
         self.quick_order_set = None
 

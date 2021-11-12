@@ -79,10 +79,10 @@ class Account:
     def create_order(self, side, quantity, price):
         success = True
         # check order quantity
-        compare_market = self.base_coin + "/USD"
+        compare_market = self.quote_coin + "/USD"
         if self.exchange.market_exists(compare_market):
             # order quantity must be >10 USD
-            quantity_usd = self.exchange.get_exchange_rate() * quantity
+            quantity_usd = self.exchange.get_exchange_rate(compare_market) * quantity
             if quantity_usd < 10:
                 log.error(
                     "Order size is below 10 USD. Please top up your account or change USE_EQUITY in config.")

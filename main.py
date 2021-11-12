@@ -26,9 +26,6 @@ if __name__ == '__main__':
     database = Database()
     account = Account(exchange, database)
 
-    # using:
-    #
-
     # read symbol
     symbol = config.SYMBOL
     base_coin = symbol.split('/')[0]
@@ -57,15 +54,6 @@ if __name__ == '__main__':
         # read balance from exchange
         quote_balance = account.read_balance(quote_coin)
 
-    # buy = account.create_order("buy", .0001, 52800)['id']
-    # print(buy)
-    # order = account.get_last_filled_order()
-    # print(order)
-    # database.save_order(order)
-    # database.read_orders()
-    # time.sleep(5)
-    # account.cancel_open_orders()
-    # print(database.read_orders())
 
     log.info("Setup complete!")
     log.info("")
@@ -82,25 +70,6 @@ if __name__ == '__main__':
     log.info("Starting value: " + str(starting_value) + " " + quote_coin)
     log.info("")
 
-    # while True:
-    #     text = input("Would you like to start the simulation now? (y/n) ")
-    #     if text in ["y", "yes"]:
-    #         # successful, sim may start
-    #         break
-    #     elif text in ["n", "no"]:
-    #         # abort, shut down
-    #         log.info("Simulation aborted! kthxbye")
-    #         sys.exit(0)
-    #     else:
-    #         log.warn("Invalid input, please try again...")
 
-    # start the simulation
-    # grid_strategy = GridStrategy()
-    # end_value = grid_strategy.start(exchange.historical_data, symbol,
-    #                                 base_balance, quote_balance)
-    # percent = (end_value / starting_value - 1) * 100
-    # log.info("Change: %.3f%%" % percent)
-
-    # start trading
     strategy = GridStrategy(account)
     strategy.start()
