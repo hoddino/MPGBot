@@ -1,4 +1,5 @@
 import log
+import ccxt
 
 
 class Account:
@@ -76,6 +77,7 @@ class Account:
         return filled_orders
 
     def create_order(self, side, quantity, price):
+        success = True
         # check order quantity
         compare_market = self.base_coin + "/USD"
         if self.exchange.market_exists(compare_market):
@@ -89,7 +91,15 @@ class Account:
 
         # quantity in base currency
         # price in quote currency
-        order = self.exchange.create_order(side, quantity, price)
+        try:
+            order = self.exchange.create_order(side, quantity, price)
+        except ccxt.RequestTimeout as exc:
+            log.warn("Order creation has timed out!")
+            return
+        except ccxt.InvalidOrder as exc:
+            log.error("Order size too small: " + str(exc))
+        except Exception as exc:
+            log.error("Unexpected exception thrown! " + str(exc))
 
         # save order details to db
         self.db.save_order(order)
