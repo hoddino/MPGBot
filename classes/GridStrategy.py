@@ -16,13 +16,13 @@ class GridStrategy:
         self.base_coin = coins[0]
         self.quote_coin = coins[1]
         self.quote_balance = self.account.read_balance(self.quote_coin)
-        # self.base_balance = self.account.read_balance(self.base_coin)
         self.buy_price = 0
         self.buy_quantity = 0
         self.sell_price = 0
         self.sell_quantity = 0
         self.quick_order_set = None
         self.update_quote_balance()
+
 
 
 
@@ -50,6 +50,7 @@ class GridStrategy:
             self.place_grid_orders()
 
 
+
         # start trading
         while self.trading:
             try:
@@ -71,7 +72,7 @@ class GridStrategy:
                 # check if order filled
                 if buy_order['status'] == 'filled':
                     self.cancel_orders()
-                    # enlarge buy price list
+                    # append buy price list
                     self.buy_prices.append(buy_order['price'])
                     # place new grid orders
                     self.place_grid_orders()
@@ -90,25 +91,29 @@ class GridStrategy:
 
             time.sleep(config.REFRESH_RATE)
 
+
+
     def update_quote_balance(self):
         self.quote_balance = self.account.read_balance(self.quote_coin)
-
-    def update_quick_buy_order(self):
-        self.account.update_all_orders_status()
-        if not self.quick_order_set == None:
-            self.quick_order_set['status'] = self.account.get_order_by_id(
-                self.quick_order_set['id'])['status']
 
     def cancel_orders(self):
         self.account.cancel_open_orders()
 
+    def update_quick_buy_order(self):
+        self.account.update_all_orders_status()
+        if not self.quick_order_set == None:
+            self.quick_order_set['status'] = self.account.get_order_by_id(self.quick_order_set['id'])['status']
+
     def place_quick_buy_order(self):
-        # get current price -0.01%
-        self.buy_price = float(self.account.exchange.get_exchange_rate() * (1 - 0.0001))
+        # get current price -0.001% (basically buy immediately)
+        self.buy_price = float(self.account.exchange.get_exchange_rate() * (1 - 0.00001))
         buy_amount = self.buy_quantity / self.account.exchange.get_exchange_rate()  # in base currency
-        # creat order and save order id
-        self.quick_order_set = self.account.create_order(
-            "buy", buy_amount, self.buy_price)
+        # creat order and look for exception
+        try:
+            self.quick_order_set = self.account.create_order("buy", buy_amount, self.buy_price)
+        except Exception as exc:
+            log.error(f"Please top up your account or use more equity! Reason: {str(exc)}") # most likely size too small due to low equity
+        # save order id
         self.buy_id = self.quick_order_set['id']
 
     def place_grid_orders(self):
@@ -121,9 +126,11 @@ class GridStrategy:
         self.buy_price = last_price * (1 - config.STEP_DISTANCE)  # in quote currency
         # calculate amount to base currency
         buy_amount = self.buy_quantity / self.account.exchange.get_exchange_rate()  # in base currency
-        # create order and save order id
-        self.buy_id = self.account.create_order(
-            "buy", buy_amount, self.buy_price)['id']
+        # create order and look for exception
+        try:
+            self.buy_id = self.account.create_order("buy", buy_amount, self.buy_price)['id']
+        except Exception as exc:
+            log.error(f"Please top up your account or use more equity! Reason: {str(exc)}") # most likely size too small due to low equity
         # confirm quick buy order is not active
         self.quick_order_set = None
 
@@ -133,5 +140,4 @@ class GridStrategy:
         # get base balance to sell
         self.sell_quantity = self.account.read_balance(self.account.base_coin)  # in base currency
         # create order and save order id
-        self.sell_id = self.account.create_order(
-            "sell", self.sell_quantity, self.sell_price)['id']
+        self.sell_id = self.account.create_order("sell", self.sell_quantity, self.sell_price)['id']

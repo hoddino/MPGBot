@@ -30,8 +30,7 @@ class Database:
 
     def save_order(self, order):
         # cursor = self.connection.cursor()
-        self.cursor.execute("INSERT INTO Orders VALUES (%s, '%s', '%s', %s, %s, '%s', %s)" % (
-            order['id'], order['type'], order['side'], order['price'], order['amount'], order['status'], order['timestamp']))
+        self.cursor.execute("INSERT INTO Orders VALUES (%s, '%s', '%s', %s, %s, '%s', %s)" % (order['id'], order['type'], order['side'], order['price'], order['amount'], order['status'], order['timestamp']))
         self.connection.commit()
         # cursor.close()
 
@@ -49,8 +48,7 @@ class Database:
             self.connection.commit()
 
             # info message
-            log.info("Order id " + order['id'] +
-                     " changed status to: " + status)
+            log.info("Order id " + order['id'] + " changed status to: " + status)
 
     def read_orders(self):
         # cursor = self.connection.cursor()

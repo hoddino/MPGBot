@@ -10,12 +10,13 @@ ORDER_TYPE = 'limit'  # limit or market order
 SYMBOL = 'ETH/BTC'  # market to trade in
 
 # Strategy settings
-USE_EQUITY = 0.1  # percentage to use
-STEP_DISTANCE = 0.005  # percentage
-TAKE_PROFIT = 0.0075  # percentage
+USE_EQUITY = 0.01  # percentage to use
+STEP_DISTANCE = 0.0005  # percentage
+TAKE_PROFIT = 0.001  # percentage
 
 # General settings
-DECIMAL_PRECISION = 7  # amount of decimals to round values
 PREFIX_ERROR = '[ERROR]'
-PREFIX_INFO = '[INFO]'
 PREFIX_WARNING = '[WARN]'
+PREFIX_INFO = '[INFO]'
+PREFIX_BUY = '[BUY]'
+PREFIX_SELL = '[SELL]'

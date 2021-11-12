@@ -56,7 +56,7 @@ class Account:
     def get_last_filled_order(self):
         orders = self.db.read_orders()
 
-        for order in list(reversed(orders)):
+        for order in list(orders):
             if order[5] == 'filled':
                 return order
 
@@ -79,14 +79,12 @@ class Account:
         # quantity in base currency
         # price in quote currency
         order = self.exchange.create_order(side, quantity, price)
-        # print(str(order))
 
         # save order details to db
         self.db.save_order(order)
 
         # print log msg
-        log.info(
-            f"{str(side).capitalize()} order id {order['id']} has been placed! {quantity} {self.base_coin} @ {price} {self.quote_coin}")
+        log.info(f"{str(side).capitalize()} order id {order['id']} has been placed! {quantity} {self.base_coin} @ {price} {self.quote_coin}")
 
         return order
 
