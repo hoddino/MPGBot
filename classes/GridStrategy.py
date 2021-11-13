@@ -32,7 +32,7 @@ class GridStrategy:
         # calculate buy_quantity (amount) in quote currency
         self.buy_quantity = self.quote_balance * config.USE_EQUITY
         # get filled order history
-        filled_orders = self.account.get_filled_orders()
+        filled_orders = self.account.get_filled_exchange_orders()
         # no order history -> start quick buy
         if len(filled_orders) == 0:
             self.place_quick_buy_order()
@@ -74,6 +74,8 @@ class GridStrategy:
                     self.cancel_orders()
                     # append buy price list
                     self.buy_prices.append(buy_order['price'])
+                    # buy log message "BUY order of (quantity) at (price) got FILLED."
+                    log.buy(f"Order of {round(buy_order['quantity'], config.DECIMAL_PRECISION)} {self.base_coin} at {round(buy_order['price'], config.DECIMAL_PRECISION)} {self.quote_coin} got FILLED.")
                     # place new grid orders
                     self.place_grid_orders()
 
@@ -83,6 +85,20 @@ class GridStrategy:
                     self.buy_quantity = self.quote_balance * config.USE_EQUITY
                     # reset buy price list
                     self.buy_prices = []
+                    # calculate profit
+                    buy_sum = 0
+                    for order in self.account.get_filled_orders()[1:]:
+                        # stop when sell order
+                        if order['type'] == 'sell':
+                            break
+                        # add buy orders together
+                        if order['status'] == 'filled' and order['type'] == 'buy':
+                            buy_sum += order['price'] * order['quantity']   # value in quote currency
+                    profit = sell_order['price'] * sell_order['quantity'] - buy_sum
+                    # sell log message "SELL order of (quantity) at (price) got FILLED.   [Profit: BTC]"
+                    log.sell(f"Order of {round(sell_order['quantity'], config.DECIMAL_PRECISION)} {self.base_coin} at {round(sell_order['price'], config.DECIMAL_PRECISION)} {self.quote_coin} got FILLED.         [Profit: {round(profit, config.DECIMAL_PRECISION)} {self.quote_coin}]")
+                    # save profit to Database
+                    self.account.save_profit(profit)
                     # make quick buy to have a new base balance
                     self.place_quick_buy_order()
 

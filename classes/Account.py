@@ -63,7 +63,7 @@ class Account:
 
         return None
 
-    def get_filled_orders(self):
+    def get_filled_exchange_orders(self):
         # from exchange
         orders = self.exchange.get_order_history()
 
@@ -72,6 +72,26 @@ class Account:
         for order in orders:
             if order['status'] == 'closed':
                 filled_orders.append(order)
+
+        return filled_orders
+
+    def get_filled_orders(self):
+        # from database
+        orders = self.db.read_orders()
+
+        # only take closed/filled orders
+        filled_orders = []
+        for order in orders:
+            if order[5] == 'filled':
+                filled_orders.append({
+                                "id": int(order[0]),
+                                "type": order[1],
+                                "side": order[2],
+                                "price": float(order[3]),
+                                "quantity": float(order[4]),
+                                "status": order[5],
+                                "timestamp": order[6]
+                            })
 
         return filled_orders
 
@@ -130,3 +150,6 @@ class Account:
         orders = self.exchange.get_order_history()
         for order in orders:
             self.db.update_order_status(order)
+
+    def save_profit(self, profit):
+        self.db.save_profit(profit)
