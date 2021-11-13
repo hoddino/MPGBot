@@ -21,7 +21,7 @@ then
     sh restart.sh
 else
     # Start the bot
-    pm2 start main.py --name "$name" --interpreter python3 --cron '0 3 * * *' --no-autorestart;
+    pm2 start main.py --name "$name" --interpreter python3 --cron '30 0 * * *' --no-autorestart;
 
     echo "[OK] "$name" started!";
 fi
