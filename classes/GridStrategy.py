@@ -1,12 +1,14 @@
 # import pandas as pd
 import time
+import threading
 
 import config
 import log
 
 
-class GridStrategy:
+class GridStrategy(threading.Thread):
     def __init__(self, account):
+        threading.Thread.__init__(self)
         self.account = account
         self.buy_id = 0
         self.sell_id = 0
@@ -23,10 +25,7 @@ class GridStrategy:
         self.quick_order_set = None
         self.update_quote_balance()
 
-
-
-
-    def start(self):
+    def run(self):
         # cancel open orders saved in DB
         self.cancel_orders()
         # calculate buy_quantity (amount) in quote currency
@@ -48,8 +47,6 @@ class GridStrategy:
                     break
             self.buy_price = sum(self.buy_prices) / len(self.buy_prices)
             self.place_grid_orders()
-
-
 
         # start trading
         while self.trading:
@@ -75,7 +72,8 @@ class GridStrategy:
                     # append buy price list
                     self.buy_prices.append(buy_order['price'])
                     # buy log message "BUY order of (quantity) at (price) got FILLED."
-                    log.buy(f"Order of {round(buy_order['quantity'], config.DECIMAL_PRECISION)} {self.base_coin} at {round(buy_order['price'], config.DECIMAL_PRECISION)} {self.quote_coin} got FILLED.")
+                    log.buy(
+                        f"Order of {round(buy_order['quantity'], config.DECIMAL_PRECISION)} {self.base_coin} at {round(buy_order['price'], config.DECIMAL_PRECISION)} {self.quote_coin} got FILLED.")
                     # place new grid orders
                     self.place_grid_orders()
 
@@ -93,21 +91,23 @@ class GridStrategy:
                             break
                         # add buy orders together
                         if order['status'] == 'filled' and order['type'] == 'buy':
-                            buy_sum += order['price'] * order['quantity']   # value in quote currency
-                    profit = sell_order['price'] * sell_order['quantity'] - buy_sum
+                            # value in quote currency
+                            buy_sum += order['price'] * order['quantity']
+                    profit = sell_order['price'] * \
+                        sell_order['quantity'] - buy_sum
                     # sell log message "SELL order of (quantity) at (price) got FILLED.   [Profit: BTC]"
-                    log.sell(f"Order of {round(sell_order['quantity'], config.DECIMAL_PRECISION)} {self.base_coin} at {round(sell_order['price'], config.DECIMAL_PRECISION)} {self.quote_coin} got FILLED.         [Profit: {round(profit, config.DECIMAL_PRECISION)} {self.quote_coin}]")
+                    log.sell(
+                        f"Order of {round(sell_order['quantity'], config.DECIMAL_PRECISION)} {self.base_coin} at {round(sell_order['price'], config.DECIMAL_PRECISION)} {self.quote_coin} got FILLED.         [Profit: {round(profit, config.DECIMAL_PRECISION)} {self.quote_coin}]")
                     # save profit to Database
                     self.account.save_profit(profit)
                     # make quick buy to have a new base balance
                     self.place_quick_buy_order()
 
             except Exception as exc:
-                log.warn(f"Following exception occured but we ignored it succesfully: {str(exc)}")
+                log.warn(
+                    f"Following exception occured but we ignored it succesfully: {str(exc)}")
 
             time.sleep(config.REFRESH_RATE)
-
-
 
     def update_quote_balance(self):
         self.quote_balance = self.account.read_balance(self.quote_coin)
@@ -118,14 +118,18 @@ class GridStrategy:
     def update_quick_buy_order(self):
         self.account.update_all_orders_status()
         if not self.quick_order_set == None:
-            self.quick_order_set['status'] = self.account.get_order_by_id(self.quick_order_set['id'])['status']
+            self.quick_order_set['status'] = self.account.get_order_by_id(
+                self.quick_order_set['id'])['status']
 
     def place_quick_buy_order(self):
         # get current price -0.001% (basically buy immediately)
-        self.buy_price = float(self.account.exchange.get_exchange_rate() * (1 - 0.00001))
-        buy_amount = self.buy_quantity / self.account.exchange.get_exchange_rate()  # in base currency
+        self.buy_price = float(
+            self.account.exchange.get_exchange_rate() * (1 - 0.00001))
+        buy_amount = self.buy_quantity / \
+            self.account.exchange.get_exchange_rate()  # in base currency
         # creat order
-        self.quick_order_set = self.account.create_order("buy", buy_amount, self.buy_price)
+        self.quick_order_set = self.account.create_order(
+            "buy", buy_amount, self.buy_price)
         # save order id
         self.buy_id = self.quick_order_set['id']
 
@@ -136,18 +140,24 @@ class GridStrategy:
     def place_grid_buy_order(self):
         # get last filled order price
         last_price = float(self.account.get_last_filled_order()[3])
-        self.buy_price = last_price * (1 - config.STEP_DISTANCE)  # in quote currency
+        self.buy_price = last_price * \
+            (1 - config.STEP_DISTANCE)  # in quote currency
         # calculate amount to base currency
-        buy_amount = self.buy_quantity / self.account.exchange.get_exchange_rate()  # in base currency
+        buy_amount = self.buy_quantity / \
+            self.account.exchange.get_exchange_rate()  # in base currency
         # create order
-        self.buy_id = self.account.create_order("buy", buy_amount, self.buy_price)['id']
+        self.buy_id = self.account.create_order(
+            "buy", buy_amount, self.buy_price)['id']
         # confirm quick buy order is not active
         self.quick_order_set = None
 
     def place_grid_sell_order(self):
         # calculate average oder price
-        self.sell_price = (sum(self.buy_prices) / len(self.buy_prices)) / (1 - config.TAKE_PROFIT)  # in quote currency
+        self.sell_price = (sum(self.buy_prices) / len(self.buy_prices)) / \
+            (1 - config.TAKE_PROFIT)  # in quote currency
         # get base balance to sell
-        self.sell_quantity = self.account.read_balance(self.account.base_coin)  # in base currency
+        self.sell_quantity = self.account.read_balance(
+            self.account.base_coin)  # in base currency
         # create order and save order id
-        self.sell_id = self.account.create_order("sell", self.sell_quantity, self.sell_price)['id']
+        self.sell_id = self.account.create_order(
+            "sell", self.sell_quantity, self.sell_price)['id']

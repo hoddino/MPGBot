@@ -54,7 +54,6 @@ if __name__ == '__main__':
         # read balance from exchange
         quote_balance = account.read_balance(quote_coin)
 
-
     log.info("Setup complete!")
     log.info("")
     log.info("Exchange:      " + exchange.exchange.id)
@@ -70,6 +69,9 @@ if __name__ == '__main__':
     log.info("Starting value: " + str(starting_value) + " " + quote_coin)
     log.info("")
 
+    threads = []
 
+    # setup strategy thread
     strategy = GridStrategy(account)
+    threads.append(strategy)
     strategy.start()
