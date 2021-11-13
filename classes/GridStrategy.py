@@ -138,8 +138,11 @@ class GridStrategy(threading.Thread):
         self.place_grid_sell_order()
 
     def place_grid_buy_order(self):
-        # get last filled order price
-        last_price = float(self.account.get_last_filled_order()[3])
+        # get last filled order
+        last_filled = self.account.get_last_filled_order()
+        if last_filled == None:
+            log.error("Could not find a filled order in database.")
+        last_price = float(last_filled[3])
         self.buy_price = last_price * \
             (1 - config.STEP_DISTANCE)  # in quote currency
         # calculate amount to base currency
