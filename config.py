@@ -15,7 +15,9 @@ STEP_DISTANCE = 0.0005  # percentage
 TAKE_PROFIT = 0.001  # percentage
 
 # General settings
-DECIMAL_PRECISION = 6 # amount of decimals to round values
+DAILY_RESTART_ENABLED = True
+DAILY_RESTART_TIME = '00:30'
+DECIMAL_PRECISION = 6  # amount of decimals to round values
 PREFIX_ERROR = '[ERROR]'
 PREFIX_WARNING = '[WARN]'
 PREFIX_INFO = '[INFO]'

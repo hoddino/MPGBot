@@ -77,10 +77,11 @@ if __name__ == '__main__':
     strategy = GridStrategy(account)
     threads.append(strategy)
 
-    # minutely restart
-    restarter = Restart()
-    threads.append(restarter)
+    # daily restart
+    if config.DAILY_RESTART_ENABLED:
+        restarter = Restart()
+        threads.append(restarter)
+        restarter.start()
 
-    # start
+    # start trading strategy
     strategy.start()
-    restarter.start()
