@@ -26,14 +26,14 @@ class GridStrategy(threading.Thread):
         self.update_quote_balance()
 
     def run(self):
-        # get filled order history
-        filled_orders = self.account.get_filled_exchange_orders()
         # synchronize database and exchange history
-        self.account.sync_db_to_exchange(filled_orders)
+        self.account.sync_db_to_exchange()
         # cancel open orders saved in DB
         self.cancel_orders()
         # calculate buy_quantity (amount) in quote currency
         self.buy_quantity = self.quote_balance * config.USE_EQUITY
+        # get filled order history
+        filled_orders = self.account.get_filled_exchange_orders()
         # no order history -> start quick buy
         if len(filled_orders) == 0:
             self.place_quick_buy_order()

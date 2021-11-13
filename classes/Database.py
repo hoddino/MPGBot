@@ -77,14 +77,14 @@ class Database:
         cursor = connection.cursor()
         cursor.execute(
             "SELECT * FROM Orders ORDER BY timestamp DESC LIMIT 300")
-        if cursor.rowcount < 1:
-            orders = None
-        else:
-            orders = cursor.fetchall()
+        orders = cursor.fetchall()
         cursor.close()
         connection.close()
 
-        return orders
+        if len(orders) < 1:
+            return None
+        else:
+            return orders
 
     def read_order_by_id(self, id):
         connection = sqlite3.connect(self.name)

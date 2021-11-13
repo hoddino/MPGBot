@@ -56,10 +56,8 @@ class Account:
 
     def get_last_filled_order(self):
         orders = self.db.read_orders()
-        print(len(list(orders)))
 
         for order in list(orders):
-            print(order[5])
             if order[5] == 'filled':
                 return order
 
@@ -160,8 +158,8 @@ class Account:
     def save_profit(self, profit):
         self.db.save_profit(profit)
 
-    def sync_db_to_exchange(self, order_history):
-        for order in order_history:
+    def sync_db_to_exchange(self):
+        for order in self.exchange.get_order_history():
             db_entry = self.db.read_order_by_id(order['id'])
             if db_entry == None:
                 # order not saved in db, insert
