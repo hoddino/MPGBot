@@ -56,8 +56,10 @@ class Account:
 
     def get_last_filled_order(self):
         orders = self.db.read_orders()
+        print(len(list(orders)))
 
         for order in list(orders):
+            print(order[5])
             if order[5] == 'filled':
                 return order
 
@@ -71,6 +73,7 @@ class Account:
         filled_orders = []
         for order in orders:
             if order['status'] == 'closed':
+                order['status'] = 'filled'
                 filled_orders.append(order)
 
         return filled_orders
@@ -84,14 +87,14 @@ class Account:
         for order in orders:
             if order[5] == 'filled':
                 filled_orders.append({
-                                "id": int(order[0]),
-                                "type": order[1],
-                                "side": order[2],
-                                "price": float(order[3]),
-                                "quantity": float(order[4]),
-                                "status": order[5],
-                                "timestamp": order[6]
-                            })
+                    "id": int(order[0]),
+                    "type": order[1],
+                    "side": order[2],
+                    "price": float(order[3]),
+                    "quantity": float(order[4]),
+                    "status": order[5],
+                    "timestamp": order[6]
+                })
 
         return filled_orders
 
@@ -101,9 +104,11 @@ class Account:
         compare_market = self.quote_coin + "/USD"
         if self.exchange.market_exists(compare_market):
             # order quantity must be >10 USD
-            quantity_usd = self.exchange.get_exchange_rate(compare_market) * quantity
+            quantity_usd = self.exchange.get_exchange_rate(
+                compare_market) * quantity
             if quantity_usd < 10:
-                log.error("Order size is below 10 USD. Please top up your account or change USE_EQUITY in config.")
+                log.error(
+                    "Order size is below 10 USD. Please top up your account or change USE_EQUITY in config.")
         else:
             log.warn("Order size could not be validated over 10 USD!")
 
@@ -123,7 +128,8 @@ class Account:
         self.db.save_order(order)
 
         # print log msg
-        log.info(f"{str(side).capitalize()} order id {order['id']} has been placed! {quantity} {self.base_coin} @ {price} {self.quote_coin}")
+        log.info(
+            f"{str(side).capitalize()} order id {order['id']} has been placed! {quantity} {self.base_coin} @ {price} {self.quote_coin}")
 
         return order
 
@@ -153,3 +159,13 @@ class Account:
 
     def save_profit(self, profit):
         self.db.save_profit(profit)
+
+    def sync_db_to_exchange(self, order_history):
+        for order in order_history:
+            db_entry = self.db.read_order_by_id(order['id'])
+            if db_entry == None:
+                # order not saved in db, insert
+                self.db.save_order(order)
+            else:
+                # update order attributes in db
+                self.db.update_order_status(order, False)

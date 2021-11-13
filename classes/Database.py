@@ -50,7 +50,7 @@ class Database:
         cursor.close()
         connection.close()
 
-    def update_order_status(self, order):
+    def update_order_status(self, order, message=True):
         # switch status names
         status = order['status']
         if status == 'closed':
@@ -68,15 +68,19 @@ class Database:
             connection.close()
 
             # info message
-            log.info("Order id " + order['id'] +
-                     " changed status to: " + status)
+            if message:
+                log.info("Order id " + order['id'] +
+                         " changed status to: " + status)
 
     def read_orders(self):
         connection = sqlite3.connect(self.name)
         cursor = connection.cursor()
         cursor.execute(
             "SELECT * FROM Orders ORDER BY timestamp DESC LIMIT 300")
-        orders = cursor.fetchall()
+        if cursor.rowcount < 1:
+            orders = None
+        else:
+            orders = cursor.fetchall()
         cursor.close()
         connection.close()
 
