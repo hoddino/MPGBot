@@ -1,11 +1,13 @@
 import sys
+import schedule
 from datetime import datetime
-from classes.Account import Account
 
 import log
 from classes.Exchange import Exchange
 from classes.GridStrategy import *
 from classes.Database import Database
+from classes.Account import Account
+from classes.Restart import *
 
 if __name__ == '__main__':
     # check config parameters
@@ -74,4 +76,11 @@ if __name__ == '__main__':
     # setup strategy thread
     strategy = GridStrategy(account)
     threads.append(strategy)
+
+    # minutely restart
+    restarter = Restart()
+    threads.append(restarter)
+
+    # start
     strategy.start()
+    restarter.start()

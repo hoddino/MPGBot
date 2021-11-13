@@ -2,3 +2,4 @@ datetime
 ccxt
 numpy
 pandas
+schedule
