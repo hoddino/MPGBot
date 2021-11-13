@@ -66,7 +66,6 @@ class Account:
     def get_filled_orders(self):
         # from exchange
         orders = self.exchange.get_order_history()
-        # orders = self.db.read_orders()
 
         # only take closed/filled orders
         filled_orders = []
@@ -84,8 +83,7 @@ class Account:
             # order quantity must be >10 USD
             quantity_usd = self.exchange.get_exchange_rate(compare_market) * quantity
             if quantity_usd < 10:
-                log.error(
-                    "Order size is below 10 USD. Please top up your account or change USE_EQUITY in config.")
+                log.error("Order size is below 10 USD. Please top up your account or change USE_EQUITY in config.")
         else:
             log.warn("Order size could not be validated over 10 USD!")
 
@@ -105,8 +103,7 @@ class Account:
         self.db.save_order(order)
 
         # print log msg
-        log.info(
-            f"{str(side).capitalize()} order id {order['id']} has been placed! {quantity} {self.base_coin} @ {price} {self.quote_coin}")
+        log.info(f"{str(side).capitalize()} order id {order['id']} has been placed! {quantity} {self.base_coin} @ {price} {self.quote_coin}")
 
         return order
 

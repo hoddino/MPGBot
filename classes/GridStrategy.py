@@ -77,7 +77,7 @@ class GridStrategy:
                     # place new grid orders
                     self.place_grid_orders()
 
-                elif sell_order['status'] == 'closed':
+                elif sell_order['status'] == 'filled':
                     self.cancel_orders()
                     # recalculate buy_quantity (amount) in quote currency
                     self.buy_quantity = self.quote_balance * config.USE_EQUITY
