@@ -5,6 +5,9 @@
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\,/,g')");
 cd "$basedir";
 
+# Copy the config.py file before pulling an update
+cp config.py config.old.py
+
 # Reset the git cache
 git reset --hard
 
